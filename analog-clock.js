@@ -20,46 +20,56 @@ Arrow.prototype = {
     }
 }
 
-function Clock(containerId, r, padding, imgUrl) {
-    this.r = r || 80;
+function Clock(containerId, r, padding, imgUrl, arrows) {
+
+    let self = this;
+    this.r = r || 180;
     this.padding = padding || 20;
+
     this.container = document.getElementById(containerId);
     this.canvas = document.createElement('canvas');
     this.container.appendChild(this.canvas);
     this.ctx = this.canvas.getContext('2d');
     this.canvas.width = this.r + this.padding;
     this.canvas.height = this.r + this.padding;
+
     this.center = { x: (this.r + this.padding) / 2 };
     this.center.y = this.center.x;
-    this.img = document.createElement('img');
-    this.img.src = imgUrl || 'clock.jpg';
 
-    for (arrow of this.arrows) {
+    this.img = document.createElement('img');
+    this.img.addEventListener('load', function () { self.allowDrowImage = true; })
+    this.img.src = imgUrl || 'clock.png';
+
+    this.arrows = arrows || [
+        new Arrow('h', r * 0.22, 3, 'black', null, null),
+        new Arrow('m', r * 0.27, 2, 'green', null, null),
+        new Arrow('s', r * 0.4, 1, 'red', null, null),
+    ];
+
+    for (let arrow of this.arrows) {
         arrow.center = this.center;
         arrow.ctx = this.ctx;
     }
 }
 
 Clock.prototype = {
-    arrows: [
-        new Arrow('h', 20, 3, 'black', null, null),
-        new Arrow('m', 25, 2, 'green', null, null),
-        new Arrow('s', 30, 1, 'red', null, null),
-    ],
-    drawImage: function () {
-        this.ctx.drawImage(this.img, 0, 0, this.canvas.height, this.canvas.width);
-    },
+
     draw: function () {
 
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
         this.drawImage();
-        
-        for (arrow of this.arrows) {
+
+        for (let arrow of this.arrows) {
             arrow.draw();
         }
         this.arrows[0].draw();
         requestAnimationFrame(this.draw.bind(this));
+    },
+
+    drawImage: function () {
+        if (this.allowDrowImage)
+            this.ctx.drawImage(this.img, 0, 0, this.canvas.height, this.canvas.width);
     }
 }
 
